@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register & Login</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="password"], input[type="tel"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #764ba2;
+        }
+        .toggle-link {
+            text-align: center;
+            margin-top: 15px;
+            color: #667eea;
+            cursor: pointer;
+        }
+        .error {
+            color: red;
+            font-size: 0.9em;
+            display: none;
+        }
+        .success {
+            color: green;
+            font-size: 0.9em;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="register-container">
+        <h1>Register</h1>
+        <form id="registration-form">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" required>
+
+            <label for="userId">User ID</label>
+            <input type="text" id="userId" required>
+
+            <label for="whatsapp">WhatsApp Number</label>
+            <input type="tel" id="whatsapp" required>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" required>
+
+            <label for="referrer">Referral ID (Optional)</label>
+            <input type="text" id="referrer">
+
+            <p class="error" id="error-message"></p>
+            <p class="success" id="success-message">Registration successful! Redirecting...</p>
+
+            <button type="submit">Register</button>
+        </form>
+        <p class="toggle-link" onclick="toggleForms()">Already have an account? Login</p>
+    </div>
+
+    <div class="container" id="login-container" style="display: none;">
+        <h1>Login</h1>
+        <form id="login-form">
+            <label for="loginUserId">User ID</label>
+            <input type="text" id="loginUserId" required>
+
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" required>
+
+            <p class="error" id="login-error-message">Invalid User ID or Password</p>
+
+            <button type="submit">Login</button>
+        </form>
+        <p class="toggle-link" onclick="toggleForms()">Don't have an account? Register</p>
+    </div>
+
+    <script>
+        function toggleForms() {
+            document.getElementById('register-container').style.display = 
+                document.getElementById('register-container').style.display === 'none' ? 'block' : 'none';
+            document.getElementById('login-container').style.display = 
+                document.getElementById('login-container').style.display === 'none' ? 'block' : 'none';
+        }
+
+        document.getElementById('registration-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const userId = document.getElementById('userId').value;
+            const whatsapp = document.getElementById('whatsapp').value;
+            const password = document.getElementById('password').value;
+            const referrer = document.getElementById('referrer').value;
+            const errorMessage = document.getElementById('error-message');
+            
+            let users = JSON.parse(localStorage.getItem('users')) || [];
+
+            if (password.length < 8 || !/\d/.test(password)) {
+                errorMessage.textContent = "Password must be at least 8 characters with numbers.";
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            if (users.some(user => user.userId === userId)) {
+                errorMessage.textContent = "User ID already exists.";
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            const newUser = { name, userId, whatsapp, password, referrer };
+            users.push(newUser);
+            localStorage.setItem('users', JSON.stringify(users));
+
+            errorMessage.style.display = 'none';
+            document.getElementById('success-message').style.display = 'block';
+
+            setTimeout(() => {
+                window.location.href = `myteam.html?userId=${userId}`;
+            }, 1500);
+        });
+
+        document.getElementById('login-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const userId = document.getElementById('loginUserId').value;
+            const password = document.getElementById('loginPassword').value;
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+
+            const user = users.find(user => user.userId === userId && user.password === password);
+
+            if (user) {
+                localStorage.setItem('loggedInUser', userId);
+                window.location.href = `myteam.html?userId=${userId}`;
+            } else {
+                document.getElementById('login-error-message').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
+
